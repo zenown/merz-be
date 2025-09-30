@@ -27,7 +27,7 @@ export class UsersService {
     return User.findAll() as Promise<UserData[]>;
   }
 
-  async findById(id: number): Promise<UserData> {
+  async findById(id: string): Promise<UserData> {
     const user = await User.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -43,15 +43,15 @@ export class UsersService {
     return User.create(userData) as Promise<UserData>;
   }
 
-  async update(id: number, userData: Partial<UserData>): Promise<UserData> {
+  async update(id: string, userData: Partial<UserData>): Promise<UserData> {
     return User.update(id, userData) as Promise<UserData>;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.findById(id);
     await User.delete(id);
   }
-  async sendConfirmationEmail(userId: number, email: string): Promise<boolean> {
+  async sendConfirmationEmail(userId: string, email: string): Promise<boolean> {
     // Check if user is already confirmed
     const user = await this.findById(userId);
 
@@ -108,7 +108,7 @@ export class UsersService {
   }
 
   async updateProfilePicture(
-    userId: number,
+    userId: string,
     file: Express.Multer.File,
   ): Promise<UserData> {
     const user = await this.findById(userId);
@@ -131,7 +131,7 @@ export class UsersService {
     }) as Promise<UserData>;
   }
 
-  async deleteProfilePicture(userId: number): Promise<UserData> {
+  async deleteProfilePicture(userId: string): Promise<UserData> {
     const user = await this.findById(userId);
 
     if (user.profilePicture) {

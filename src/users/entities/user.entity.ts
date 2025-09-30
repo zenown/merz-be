@@ -13,7 +13,7 @@ export enum UserRole {
 }
 
 export interface UserData {
-  id?: number;
+  id?: string;
   email: string;
   password?: string;
   firstName?: string;
@@ -27,15 +27,15 @@ export interface UserData {
   theme?: string;
   lastPasswordResetAt?: Date;
   lastEmailConfirmationAt?: Date;
-  createdById?: number;
-  updatedById?: number;
+  createdById?: string;
+  updatedById?: string;
   role?: UserRole;
 }
 @Entity('users')
 export class User extends BaseEntity {
   tableName = 'users';
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   email: string;
@@ -71,10 +71,10 @@ export class User extends BaseEntity {
   lastEmailConfirmationAt: Date;
 
   @Column({ name: 'created_by_id', nullable: true })
-  createdById: number;
+  createdById: string;
 
   @Column({ name: 'updated_by_id', nullable: true })
-  updatedById: number;
+  updatedById: string;
 
   @Column({ name: 'role', type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;

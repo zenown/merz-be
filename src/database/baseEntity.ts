@@ -52,7 +52,6 @@ export class BaseEntity {
     const placeholders = keys.map(() => '?').join(', ');
     const columns = keys.join(', ');
     const values = Object.values(data);
-    console.log(columns, placeholders, values);
 
     const result = await this.databaseService.query(
       `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`,

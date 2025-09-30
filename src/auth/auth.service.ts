@@ -9,6 +9,7 @@ import { UsersService } from '../users/users.service';
 import { UserData } from '../users/entities/user.entity';
 import { EmailService } from 'src/email/email.service';
 import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -52,6 +53,7 @@ export class AuthService {
 
     // Create the user with hashed password
     const newUser = await this.usersService.create({
+      id: uuidv4(),
       ...userData,
       password: hashedPassword,
     });
@@ -65,7 +67,7 @@ export class AuthService {
   }
 
   async changePassword(
-    userId: number,
+    userId: string,
     newPassword: string,
     oldPassword?: string,
   ): Promise<UserData> {

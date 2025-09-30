@@ -2,7 +2,7 @@ module.exports = {
   async up(dbService) {
     await dbService.query(`
       CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id CHAR(36) PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255),
         firstName VARCHAR(255),
