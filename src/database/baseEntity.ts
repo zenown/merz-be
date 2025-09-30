@@ -89,4 +89,45 @@ export class BaseEntity {
       [id],
     );
   }
+
+  static async findAllWithSearchAndSort(options: {
+    search?: string;
+    searchColumns?: string[];
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+    filter?: Record<string, any>;
+  } = {}) {
+    const { search, searchColumns = [], sortBy, sortOrder = 'ASC', filter = {} } = options;
+    
+    let query = `SELECT * FROM ${this.tableName}`;
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    // Add filter conditions
+    const filterEntries = Object.entries(filter).filter(([, v]) => v !== undefined && v !== null && v !== '');
+    if (filterEntries.length > 0) {
+      const filterConditions = filterEntries.map(([k]) => `${k} = ?`);
+      conditions.push(...filterConditions);
+      values.push(...filterEntries.map(([, v]) => v));
+    }
+
+    // Add search conditions
+    if (search && searchColumns.length > 0) {
+      const searchConditions = searchColumns.map(column => `${column} LIKE ?`);
+      conditions.push(`(${searchConditions.join(' OR ')})`);
+      values.push(...searchColumns.map(() => `%${search}%`));
+    }
+
+    // Build WHERE clause
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    // Add ORDER BY clause
+    if (sortBy) {
+      query += ` ORDER BY ${sortBy} ${sortOrder}`;
+    }
+
+    return this.databaseService.query(query, values);
+  }
 }

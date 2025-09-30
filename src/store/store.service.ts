@@ -2,23 +2,88 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { Store, StoreData } from './store.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class StoreService {
   constructor(private readonly databaseService: DatabaseService) {
     Store.setDatabaseService(this.databaseService);
     Store.setTableName('stores');
+    User.setDatabaseService(this.databaseService);
+    User.setTableName('users');
   }
 
-  findAll(filter?: Partial<StoreData>): Promise<StoreData[]> {
-    if (filter && Object.keys(filter).length > 0) {
-      return Store.findAllByFilter(filter as Record<string, any>) as Promise<StoreData[]>;
+  async findAll(options: {
+    filter?: Partial<StoreData>;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+  } = {}): Promise<any[]> {
+    const { filter = {}, search, sortBy, sortOrder } = options;
+    
+    const searchColumns = ['name', 'address'];
+    const stores = await Store.findAllWithSearchAndSort({
+      search,
+      searchColumns,
+      sortBy,
+      sortOrder,
+      filter: filter as Record<string, any>
+    }) as StoreData[];
+    
+    return this.populateStoreRelations(stores);
+  }
+
+  async findById(id: string): Promise<any> {
+    const store = await Store.findById(id) as StoreData;
+    if (!store) return null;
+    const populatedStores = await this.populateStoreRelations([store]);
+    return populatedStores[0];
+  }
+
+  private async populateStoreRelations(stores: StoreData[]): Promise<any[]> {
+    const populatedStores: any[] = [];
+    
+    for (const store of stores) {
+      const populatedStore: any = { ...store };
+      
+      // Populate createdBy relation
+      if (store.createdById) {
+        try {
+          const createdBy = await User.findById(store.createdById);
+          populatedStore.createdBy = createdBy ? {
+            id: createdBy.id,
+            email: createdBy.email,
+            firstName: createdBy.firstName,
+            lastName: createdBy.lastName,
+            profilePicture: createdBy.profilePicture,
+            role: createdBy.role
+          } : null;
+        } catch (error) {
+          populatedStore.createdBy = null;
+        }
+      }
+      
+      // Populate updatedBy relation
+      if (store.updatedById) {
+        try {
+          const updatedBy = await User.findById(store.updatedById);
+          populatedStore.updatedBy = updatedBy ? {
+            id: updatedBy.id,
+            email: updatedBy.email,
+            firstName: updatedBy.firstName,
+            lastName: updatedBy.lastName,
+            profilePicture: updatedBy.profilePicture,
+            role: updatedBy.role
+          } : null;
+        } catch (error) {
+          populatedStore.updatedBy = null;
+        }
+      }
+      
+      populatedStores.push(populatedStore);
     }
-    return Store.findAll() as Promise<StoreData[]>;
-  }
-
-  findById(id: string): Promise<StoreData> {
-    return Store.findById(id) as Promise<StoreData>;
+    
+    return populatedStores;
   }
 
   create(data: StoreData): Promise<StoreData> {

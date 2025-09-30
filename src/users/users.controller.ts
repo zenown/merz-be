@@ -44,17 +44,25 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List users with optional filters' })
+  @ApiOperation({ summary: 'List users with search and sort options' })
   @ApiResponse({ status: 200, description: 'Returns users list' })
-  @ApiQuery({ name: 'email', required: false, type: String })
-  @ApiQuery({ name: 'firstName', required: false, type: String })
-  @ApiQuery({ name: 'lastName', required: false, type: String })
-  @ApiQuery({ name: 'isConfirmed', required: false, type: Boolean })
-  @ApiQuery({ name: 'role', required: false, type: String })
+  @ApiQuery({ name: 'email', required: false, type: String, description: 'Filter by email' })
+  @ApiQuery({ name: 'firstName', required: false, type: String, description: 'Filter by first name' })
+  @ApiQuery({ name: 'lastName', required: false, type: String, description: 'Filter by last name' })
+  @ApiQuery({ name: 'isConfirmed', required: false, type: Boolean, description: 'Filter by confirmation status' })
+  @ApiQuery({ name: 'role', required: false, type: String, description: 'Filter by role' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search in firstName, lastName, and email fields' })
+  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Sort by field (firstName, lastName, email, createdAt, updatedAt)' })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'], description: 'Sort order' })
   async listUsers(@Query() query: any) {
     // Only allow certain filter fields to avoid exposing sensitive data
-    const { email, firstName, lastName, isConfirmed, role } = query;
-    return this.usersService.findAll({ email, firstName, lastName, isConfirmed, role } as any);
+    const { email, firstName, lastName, isConfirmed, role, search, sortBy, sortOrder } = query;
+    return this.usersService.findAll({
+      filter: { email, firstName, lastName, isConfirmed, role },
+      search,
+      sortBy,
+      sortOrder
+    });
   }
 
   @Put('profile')

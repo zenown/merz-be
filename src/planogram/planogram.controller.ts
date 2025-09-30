@@ -24,12 +24,20 @@ export class PlanogramController {
   constructor(private readonly planogramService: PlanogramService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List planograms' })
-  @ApiQuery({ name: 'name', required: false, type: String })
-  @ApiQuery({ name: 'storeId', required: false, type: String })
+  @ApiOperation({ summary: 'List planograms with search and sort options' })
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by planogram name' })
+  @ApiQuery({ name: 'storeId', required: false, type: String, description: 'Filter by store ID' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search in name and description fields' })
+  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Sort by field (name, description, createdAt, updatedAt)' })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'], description: 'Sort order' })
   async findAll(@Query() query: any) {
-    const { name, storeId } = query;
-    return this.planogramService.findAll({ name, storeId } as any);
+    const { name, storeId, search, sortBy, sortOrder } = query;
+    return this.planogramService.findAll({
+      filter: { name, storeId },
+      search,
+      sortBy,
+      sortOrder
+    });
   }
 
   @Get(':id')

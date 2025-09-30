@@ -20,19 +20,79 @@ export class UsersService {
     User.setTableName('users');
   }
 
-  async findAll(filter?: Partial<UserData>): Promise<UserData[]> {
-    if (filter && Object.keys(filter).length > 0) {
-      return User.findAllByFilter(filter as Record<string, any>) as Promise<UserData[]>;
-    }
-    return User.findAll() as Promise<UserData[]>;
+  async findAll(options: {
+    filter?: Partial<UserData>;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+  } = {}): Promise<any[]> {
+    const { filter = {}, search, sortBy, sortOrder } = options;
+    
+    const searchColumns = ['firstName', 'lastName', 'email'];
+    const users = await User.findAllWithSearchAndSort({
+      search,
+      searchColumns,
+      sortBy,
+      sortOrder,
+      filter: filter as Record<string, any>
+    }) as UserData[];
+    
+    return this.populateUserRelations(users);
   }
 
-  async findById(id: string): Promise<UserData> {
+  async findById(id: string): Promise<any> {
     const user = await User.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return user as UserData;
+    const populatedUsers = await this.populateUserRelations([user]);
+    return populatedUsers[0];
+  }
+
+  private async populateUserRelations(users: UserData[]): Promise<any[]> {
+    const populatedUsers: any[] = [];
+    
+    for (const user of users) {
+      const populatedUser: any = { ...user };
+      
+      // Populate createdBy relation
+      if (user.createdById) {
+        try {
+          const createdBy = await User.findById(user.createdById);
+          populatedUser.createdBy = createdBy ? {
+            id: createdBy.id,
+            email: createdBy.email,
+            firstName: createdBy.firstName,
+            lastName: createdBy.lastName,
+            profilePicture: createdBy.profilePicture,
+            role: createdBy.role
+          } : null;
+        } catch (error) {
+          populatedUser.createdBy = null;
+        }
+      }
+      
+      // Populate updatedBy relation
+      if (user.updatedById) {
+        try {
+          const updatedBy = await User.findById(user.updatedById);
+          populatedUser.updatedBy = updatedBy ? {
+            id: updatedBy.id,
+            email: updatedBy.email,
+            firstName: updatedBy.firstName,
+            lastName: updatedBy.lastName,
+            profilePicture: updatedBy.profilePicture,
+            role: updatedBy.role
+          } : null;
+        } catch (error) {
+          populatedUser.updatedBy = null;
+        }
+      }
+      
+      populatedUsers.push(populatedUser);
+    }
+    
+    return populatedUsers;
   }
 
   async findByEmail(email: string): Promise<UserData> {

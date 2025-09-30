@@ -24,12 +24,20 @@ export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List stores' })
-  @ApiQuery({ name: 'name', required: false, type: String })
-  @ApiQuery({ name: 'address', required: false, type: String })
+  @ApiOperation({ summary: 'List stores with search and sort options' })
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
+  @ApiQuery({ name: 'address', required: false, type: String, description: 'Filter by store address' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search in name and address fields' })
+  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Sort by field (name, address, createdAt, updatedAt)' })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'], description: 'Sort order' })
   async findAll(@Query() query: any) {
-    const { name, address } = query;
-    return this.storeService.findAll({ name, address } as any);
+    const { name, address, search, sortBy, sortOrder } = query;
+    return this.storeService.findAll({
+      filter: { name, address },
+      search,
+      sortBy,
+      sortOrder
+    });
   }
 
   @Get(':id')
