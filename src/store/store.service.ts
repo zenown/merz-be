@@ -89,16 +89,16 @@ export class StoreService {
   create(data: StoreData): Promise<StoreData> {
     const row = { id: uuidv4(), ...data, createdAt: new Date(), updatedAt: new Date() } as StoreData;
     console.log(row);
-    return Store.create(row) as Promise<StoreData>;
+    return Store.createRecord(row) as Promise<StoreData>;
   }
 
   update(id: string, data: Partial<StoreData>): Promise<StoreData> {
     const row = { ...data, updatedAt: new Date() } as Partial<StoreData>;
-    return Store.update(id, row) as Promise<StoreData>;
+    return Store.updateRecord(id, row) as Promise<StoreData>;
   }
 
   remove(id: string): Promise<void> {
-    return Store.delete(id) as unknown as Promise<void>;
+    return Store.deleteRecord(id) as unknown as Promise<void>;
   }
 }
 

@@ -1,7 +1,7 @@
 import { DatabaseService } from './database.service';
-import { getMetadataArgsStorage } from 'typeorm';
+import { getMetadataArgsStorage, BaseEntity as TypeORMBaseEntity } from 'typeorm';
 
-export class BaseEntity {
+export class BaseEntity extends TypeORMBaseEntity {
   protected static databaseService: DatabaseService;
   protected static tableName: string;
 
@@ -79,7 +79,7 @@ export class BaseEntity {
     return results.length > 0 ? results[0] : null;
   }
 
-  static async create(data: Record<string, any>) {
+  static async createRecord(data: Record<string, any>) {
     const keys = Object.keys(data);
     const columnMappings = this.getColumnMappings();
     
@@ -108,7 +108,7 @@ export class BaseEntity {
     };
   }
 
-  static async update(id: string | number, data: Record<string, any>) {
+  static async updateRecord(id: string | number, data: Record<string, any>) {
     const keys = Object.keys(data);
     const columnMappings = this.getColumnMappings();
     
@@ -124,7 +124,7 @@ export class BaseEntity {
     return this.findById(id);
   }
 
-  static async delete(id: string | number) {
+  static async deleteRecord(id: string | number) {
     return this.databaseService.query(
       `DELETE FROM ${this.tableName} WHERE id = ?`,
       [id],

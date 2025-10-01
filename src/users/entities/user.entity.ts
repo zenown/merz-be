@@ -70,10 +70,10 @@ export class User extends BaseEntity {
   @Column({ name: 'last_email_confirmation_at', nullable: true })
   lastEmailConfirmationAt: Date;
 
-  @Column({ name: 'created_by_id', nullable: true })
+  @Column({ name: 'created_by_id', type: 'char', length: 36, nullable: true })
   createdById: string;
 
-  @Column({ name: 'updated_by_id', nullable: true })
+  @Column({ name: 'updated_by_id', type: 'char', length: 36, nullable: true })
   updatedById: string;
 
   @Column({ name: 'role', type: 'enum', enum: UserRole, default: UserRole.USER })

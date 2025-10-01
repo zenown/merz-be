@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as handlebars from 'handlebars';
+import handlebars from 'handlebars';
 
 @Injectable()
 export class EmailService {

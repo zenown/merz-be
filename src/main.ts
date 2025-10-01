@@ -1,16 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Enable CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL, // Replace with your Next.js frontend URL
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Use env var or default to localhost:3000
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization',
+    allowedHeaders: 'Content-Type,Authorization,Cookie',
     credentials: true,
   });
   // Global validation pipe
@@ -35,17 +35,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-   // Allow all origins, methods, and headers
-  app.enableCors({
-    origin: '*',
-    methods: '*',
-    allowedHeaders: '*',
-  });
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
   app.use(bodyParser.json());
 
-  await app.listen(3002);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  await app.listen(3001);
+  console.log(`Application is running on: http://localhost:3001`);
 }
 bootstrap();
 

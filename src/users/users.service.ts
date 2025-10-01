@@ -100,16 +100,16 @@ export class UsersService {
   }
 
   async create(userData: UserData): Promise<UserData> {
-    return User.create(userData) as Promise<UserData>;
+    return User.createRecord(userData) as Promise<UserData>;
   }
 
   async update(id: string, userData: Partial<UserData>): Promise<UserData> {
-    return User.update(id, userData) as Promise<UserData>;
+    return User.updateRecord(id, userData) as Promise<UserData>;
   }
 
   async remove(id: string): Promise<void> {
     const user = await this.findById(id);
-    await User.delete(id);
+    await User.deleteRecord(id);
   }
   async sendConfirmationEmail(userId: string, email: string): Promise<boolean> {
     // Check if user is already confirmed

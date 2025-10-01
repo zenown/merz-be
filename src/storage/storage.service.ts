@@ -2,7 +2,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { STORAGE_CONFIG } from './storage.constants';
 import { StorageConfig, UploadedFile } from './storage.interface';
-import * as AWS from 'aws-sdk';
+import AWS from 'aws-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';

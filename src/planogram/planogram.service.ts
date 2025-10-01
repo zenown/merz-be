@@ -106,16 +106,16 @@ export class PlanogramService {
 
   create(data: PlanogramData): Promise<PlanogramData> {
     const row = { id: uuidv4(), ...data, createdAt: new Date(), updatedAt: new Date() } as PlanogramData;
-    return Planogram.create(row) as Promise<PlanogramData>;
+    return Planogram.createRecord(row) as Promise<PlanogramData>;
   }
 
   update(id: string, data: Partial<PlanogramData>): Promise<PlanogramData> {
     const row = { ...data, updatedAt: new Date() } as Partial<PlanogramData>;
-    return Planogram.update(id, row) as Promise<PlanogramData>;
+    return Planogram.updateRecord(id, row) as Promise<PlanogramData>;
   }
 
   remove(id: string): Promise<void> {
-    return Planogram.delete(id) as unknown as Promise<void>;
+    return Planogram.deleteRecord(id) as unknown as Promise<void>;
   }
 }
 

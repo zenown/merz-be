@@ -40,16 +40,16 @@ export class Upload extends BaseEntity {
   @CreateDateColumn({ name: 'uploaded_at' })
   uploadedAt: Date;
 
-  @Column({ name: 'uploaded_by_id' })
+  @Column({ name: 'uploaded_by_id', type: 'char', length: 36 })
   uploadedById: string;
 
-  @Column({ name: 'store_id' })
+  @Column({ name: 'store_id', type: 'char', length: 36 })
   storeId: string;
 
-  @Column({ name: 'planogram_id' })
+  @Column({ name: 'planogram_id', type: 'char', length: 36 })
   planogramId: string;
 
-  @Column({ name: 'submission_id', nullable: true })
+  @Column({ name: 'submission_id', type: 'char', length: 36, nullable: true })
   submissionId: string | null;
 
   @CreateDateColumn({ name: 'created_at' })

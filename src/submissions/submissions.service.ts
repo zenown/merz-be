@@ -134,7 +134,7 @@ export class SubmissionsService {
       createdAt: new Date(), 
       updatedAt: new Date() 
     } as SubmissionData;
-    return Submission.create(row) as Promise<SubmissionData>;
+    return Submission.createRecord(row) as Promise<SubmissionData>;
   }
 
   async createWithFileUpload(
@@ -179,10 +179,10 @@ export class SubmissionsService {
     
     // Update upload with submission ID
     uploadData.submissionId = submission.id;
-    const upload = await Upload.create(uploadData) as UploadData;
+    const upload = await Upload.createRecord(uploadData) as UploadData;
     
     // Update submission with upload ID
-    const updatedSubmission = await Submission.update(submission?.id || '', {
+    const updatedSubmission = await Submission.updateRecord(submission?.id || '', {
       uploadIds: [upload.id]
     }) as SubmissionData;
 
@@ -208,7 +208,7 @@ export class SubmissionsService {
 
     // Update upload with submission ID and store/planogram IDs from submission
     console.log('submission', submission);
-    await Upload.update(uploadId, { 
+    await Upload.updateRecord(uploadId, { 
       submissionId,
       storeId: submission.store_id,
       planogramId: submission.planogram_id
@@ -216,7 +216,7 @@ export class SubmissionsService {
 
     // Update submission with new upload ID
     const updatedUploadIds = [...(submission.uploadIds || []), uploadId];
-    return Submission.update(submissionId, { uploadIds: updatedUploadIds }) as Promise<SubmissionData>;
+    return Submission.updateRecord(submissionId, { uploadIds: updatedUploadIds }) as Promise<SubmissionData>;
   }
 
   async createUpload(
@@ -260,16 +260,16 @@ export class SubmissionsService {
     };
     console.log('uploadData', uploadData);
 
-    return Upload.create(uploadData) as Promise<UploadData>;
+    return Upload.createRecord(uploadData) as Promise<UploadData>;
   }
 
   update(id: string, data: Partial<SubmissionData>): Promise<SubmissionData> {
     const row = { ...data, updatedAt: new Date() } as Partial<SubmissionData>;
-    return Submission.update(id, row) as Promise<SubmissionData>;
+    return Submission.updateRecord(id, row) as Promise<SubmissionData>;
   }
 
   remove(id: string): Promise<void> {
-    return Submission.delete(id) as unknown as Promise<void>;
+    return Submission.deleteRecord(id) as unknown as Promise<void>;
   }
 }
 
