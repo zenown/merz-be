@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { Store } from '../store/store.entity';
 import { Planogram } from '../planogram/planogram.entity';
 import { StorageService } from '../storage/storage.service';
+import { equal } from 'assert';
 
 @Injectable()
 export class SubmissionsService {
@@ -56,13 +57,13 @@ export class SubmissionsService {
   private async populateSubmissionRelations(submissions: SubmissionData[]): Promise<any[]> {
     const populatedSubmissions: any[] = [];
     
-    for (const submission of submissions) {
+    for (const submission of submissions as any[]) {
       const populatedSubmission: any = { ...submission };
       
       // Populate uploadedBy relation
-      if (submission.uploadedById) {
+      if (submission.uploaded_by_id) {
         try {
-          const uploadedBy = await User.findById(submission.uploadedById);
+          const uploadedBy = await User.findById(submission.uploaded_by_id);
           populatedSubmission.uploadedBy = uploadedBy ? {
             id: uploadedBy.id,
             email: uploadedBy.email,
@@ -107,12 +108,21 @@ export class SubmissionsService {
       }
       
       // Populate uploads relation
-      if (submission.uploadIds && submission.uploadIds.length > 0) {
+ 
+      if ((submission as any)?.upload_ids && (submission as any).upload_ids.length > 0) {
         try {
-          const uploads = await Promise.all(
-            submission.uploadIds.map(uploadId => Upload.findById(uploadId))
-          );
-          populatedSubmission.uploads = uploads.filter(upload => upload !== null);
+          //fetch uploads that has submissionId
+          const uploads = await Upload.findAllByFilter({
+            submissionId: submission.id
+          }) as any[]
+         
+          // Add imageSrc to each upload
+          const uploadsWithImageSrc = uploads.map((upload: any) => ({
+            ...upload,
+            imageSrc: this.storageService.getPublicUrl('submissions/' + upload.filename)
+          }));
+          
+          populatedSubmission.uploads = uploadsWithImageSrc
         } catch (error) {
           populatedSubmission.uploads = [];
         }
@@ -142,10 +152,14 @@ export class SubmissionsService {
     file: Express.Multer.File,
     uploadedById: string
   ): Promise<{ submission: SubmissionData; upload: UploadData }> {
+    // Upload file to storage first
+    const uploadedFile = await this.storageService.uploadFile(file, 'submissions');
+    console.log('uploadedFile', uploadedFile);
+    
     // First create the upload
     const uploadData: UploadData = {
       id: uuidv4(),
-      filename: file.originalname,
+      filename: uploadedFile.filename,
       filesize: file.size.toString(),
       fileType: file.mimetype,
       uploadedAt: new Date(),
@@ -153,15 +167,10 @@ export class SubmissionsService {
       storeId: data.storeId,
       planogramId: data.planogramId,
       submissionId: '', // Will be updated after submission is created
+      imageSrc: uploadedFile.url,
       createdAt: new Date(),
       updatedAt: new Date()
     };
-
-    // Upload file to storage
-    const uploadedFile = await this.storageService.uploadFile(file, 'submissions');
-    console.log('uploadedFile', uploadedFile);
-    // Update upload data with file path
-    uploadData.filename = uploadedFile.filename;
     
     // Create the submission first
     const submissionData: SubmissionData = {
@@ -255,6 +264,7 @@ export class SubmissionsService {
       storeId: ensuredStoreId,
       planogramId: ensuredPlanogramId,
       submissionId: data.submissionId || null,
+      imageSrc: uploadedFile.url,
       createdAt: new Date(),
       updatedAt: new Date()
     };

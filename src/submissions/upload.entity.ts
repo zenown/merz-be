@@ -17,6 +17,7 @@ export interface UploadData {
   storeId?: string;
   planogramId?: string;
   submissionId?: string | null;
+  imageSrc?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -57,4 +58,10 @@ export class Upload extends BaseEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  get imageSrc(): string {
+    // This will be populated by the service layer
+    // The actual URL generation will be handled in the submissions service
+    return '';
+  }
 }
