@@ -37,6 +37,10 @@ export class UsersService {
       filter: filter as Record<string, any>
     }) as UserData[];
     
+    // delete password field 
+    users.forEach(user => {
+      delete user.password;
+    });
     return this.populateUserRelations(users);
   }
 
