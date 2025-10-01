@@ -17,10 +17,24 @@ export class StorageService {
   private isLocalStorage: boolean;
 
   constructor(@Inject(STORAGE_CONFIG) private readonly config: StorageConfig) {
-    this.isLocalStorage =
-      config.storageType === 'local' || process.env.NODE_ENV === 'development';
+    // Use local storage if explicitly set to 'local' or if S3 config is incomplete
+    this.isLocalStorage = config.storageType === 'local' || 
+      !config.s3?.bucketName || 
+      !config.s3?.region || 
+      !config.s3?.accessKeyId || 
+      !config.s3?.secretAccessKey ||
+      config.storageType === undefined; // Default to local if storageType is undefined
+    
+    console.log('Storage config:', {
+      storageType: config.storageType,
+      isLocalStorage: this.isLocalStorage,
+      s3Config: config.s3,
+      hasValidS3Config: !!(config.s3?.bucketName && config.s3?.region && config.s3?.accessKeyId && config.s3?.secretAccessKey)
+    });
 
-    if (!this.isLocalStorage && config && config?.s3) {
+    if (!this.isLocalStorage && config && config?.s3 && 
+        config.s3.bucketName && config.s3.region && 
+        config.s3.accessKeyId && config.s3.secretAccessKey) {
       this.s3 = new AWS.S3({
         region: config.s3.region,
         accessKeyId: config.s3.accessKeyId,
@@ -83,15 +97,18 @@ export class StorageService {
     file: Express.Multer.File,
     folder: string,
   ): Promise<UploadedFile> {
+    if (!this.config?.s3?.bucketName) {
+      throw new Error('S3 bucket name is not configured');
+    }
+
     const filename = `${uuidv4()}-${file.originalname}`;
     const key = folder ? `${folder}/${filename}` : filename;
 
     const params = {
-      Bucket: this.config?.s3?.bucketName,
+      Bucket: this.config.s3.bucketName,
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read',
     };
 
     const result = await this.s3.upload(params as any).promise();
@@ -117,9 +134,12 @@ export class StorageService {
           await unlinkAsync(fullPath);
         }
       } else {
+        if (!this.config?.s3?.bucketName) {
+          throw new Error('S3 bucket name is not configured');
+        }
         await this.s3
           .deleteObject({
-            Bucket: this.config?.s3?.bucketName + '',
+            Bucket: this.config.s3.bucketName,
             Key: filepath,
           })
           .promise();
@@ -137,7 +157,10 @@ export class StorageService {
     if (this.isLocalStorage) {
       return `/public/${filepath.replace(/\\/g, '/')}`;
     } else {
-      return `https://${this.config?.s3?.bucketName}.s3.${this.config?.s3?.region}.amazonaws.com/${filepath}`;
+      if (!this.config?.s3?.bucketName || !this.config?.s3?.region) {
+        throw new Error('S3 bucket name or region is not configured');
+      }
+      return `https://${this.config.s3.bucketName}.s3.${this.config.s3.region}.amazonaws.com/${filepath}`;
     }
   }
 }

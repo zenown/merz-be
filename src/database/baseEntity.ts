@@ -1,4 +1,5 @@
 import { DatabaseService } from './database.service';
+import { getMetadataArgsStorage } from 'typeorm';
 
 export class BaseEntity {
   protected static databaseService: DatabaseService;
@@ -11,6 +12,35 @@ export class BaseEntity {
     this.tableName = name;
   }
 
+  // Helper method to get column name for a field
+  protected static getColumnName(fieldName: string): string {
+    const metadata = getMetadataArgsStorage();
+    const columns = metadata.columns.filter(col => col.target === this);
+    
+    const column = columns.find(col => col.propertyName === fieldName);
+    if (column && column.options && column.options.name) {
+      return column.options.name;
+    }
+    
+    // If no explicit column name mapping, return the field name
+    return fieldName;
+  }
+
+  // Helper method to get all column mappings for this entity
+  protected static getColumnMappings(): Record<string, string> {
+    const metadata = getMetadataArgsStorage();
+    const columns = metadata.columns.filter(col => col.target === this);
+    const mappings: Record<string, string> = {};
+    
+    columns.forEach(col => {
+      const fieldName = col.propertyName;
+      const columnName = col.options && col.options.name ? col.options.name : fieldName;
+      mappings[fieldName] = columnName;
+    });
+    
+    return mappings;
+  }
+
   static async findAll() {
     return this.databaseService.query(`SELECT * FROM ${this.tableName}`);
   }
@@ -20,7 +50,8 @@ export class BaseEntity {
     if (entries.length === 0) {
       return this.findAll();
     }
-    const whereClause = entries.map(([k]) => `${k} = ?`).join(' AND ');
+    const columnMappings = this.getColumnMappings();
+    const whereClause = entries.map(([k]) => `${columnMappings[k] || k} = ?`).join(' AND ');
     const values = entries.map(([, v]) => v);
     return this.databaseService.query(`SELECT * FROM ${this.tableName} WHERE ${whereClause}`, values);
   }
@@ -36,7 +67,8 @@ export class BaseEntity {
 
   static async findByCondition(condition: Record<string, any>) {
     const keys = Object.keys(condition);
-    const whereClause = keys.map((key) => `${key} = ?`).join(' AND ');
+    const columnMappings = this.getColumnMappings();
+    const whereClause = keys.map((key) => `${columnMappings[key] || key} = ?`).join(' AND ');
     const values = Object.values(condition);
 
     const results = (await this.databaseService.query(
@@ -49,12 +81,17 @@ export class BaseEntity {
 
   static async create(data: Record<string, any>) {
     const keys = Object.keys(data);
+    const columnMappings = this.getColumnMappings();
+    
+    // Map field names to database column names
+    const columns = keys.map(key => columnMappings[key] || key);
     const placeholders = keys.map(() => '?').join(', ');
-    const columns = keys.join(', ');
+    const columnNames = columns.join(', ');
     const values = Object.values(data);
+    console.log(columnNames, placeholders, values);
 
     const result = await this.databaseService.query(
-      `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`,
+      `INSERT INTO ${this.tableName} (${columnNames}) VALUES (${placeholders})`,
       values,
     );
 
@@ -72,7 +109,10 @@ export class BaseEntity {
 
   static async update(id: string | number, data: Record<string, any>) {
     const keys = Object.keys(data);
-    const setClause = keys.map((key) => `${key} = ?`).join(', ');
+    const columnMappings = this.getColumnMappings();
+    
+    // Map field names to database column names
+    const setClause = keys.map((key) => `${columnMappings[key] || key} = ?`).join(', ');
     const values = [...Object.values(data), id];
 
     await this.databaseService.query(
@@ -106,7 +146,8 @@ export class BaseEntity {
     // Add filter conditions
     const filterEntries = Object.entries(filter).filter(([, v]) => v !== undefined && v !== null && v !== '');
     if (filterEntries.length > 0) {
-      const filterConditions = filterEntries.map(([k]) => `${k} = ?`);
+      const columnMappings = this.getColumnMappings();
+      const filterConditions = filterEntries.map(([k]) => `${columnMappings[k] || k} = ?`);
       conditions.push(...filterConditions);
       values.push(...filterEntries.map(([, v]) => v));
     }
