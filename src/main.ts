@@ -35,10 +35,16 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+   // Allow all origins, methods, and headers
+  app.enableCors({
+    origin: '*',
+    methods: '*',
+    allowedHeaders: '*',
+  });
   SwaggerModule.setup('api', app, document);
   app.use(bodyParser.json());
 
-  await app.listen(3000);
+  await app.listen(3002);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

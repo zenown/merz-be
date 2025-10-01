@@ -87,8 +87,9 @@ export class BaseEntity {
     const columns = keys.map(key => columnMappings[key] || key);
     const placeholders = keys.map(() => '?').join(', ');
     const columnNames = columns.join(', ');
-    const values = Object.values(data);
-    console.log(columnNames, placeholders, values);
+    const values = Object.values(data).map(value => value === null || value === undefined ? null : value);
+
+
 
     const result = await this.databaseService.query(
       `INSERT INTO ${this.tableName} (${columnNames}) VALUES (${placeholders})`,

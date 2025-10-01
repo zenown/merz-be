@@ -16,7 +16,7 @@ export interface UploadData {
   uploadedById?: string;
   storeId?: string;
   planogramId?: string;
-  submissionId?: string;
+  submissionId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -49,8 +49,8 @@ export class Upload extends BaseEntity {
   @Column({ name: 'planogram_id' })
   planogramId: string;
 
-  @Column({ name: 'submission_id' })
-  submissionId: string;
+  @Column({ name: 'submission_id', nullable: true })
+  submissionId: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

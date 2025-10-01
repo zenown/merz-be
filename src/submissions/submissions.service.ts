@@ -196,7 +196,7 @@ export class SubmissionsService {
     if (!uploadId) {
       throw new Error('Upload ID is required');
     }
-    const submission = await Submission.findById(submissionId) as SubmissionData;
+    const submission:any = await Submission.findById(submissionId) as SubmissionData;
     if (!submission) {
       throw new Error('Submission not found');
     }
@@ -207,10 +207,11 @@ export class SubmissionsService {
     }
 
     // Update upload with submission ID and store/planogram IDs from submission
+    console.log('submission', submission);
     await Upload.update(uploadId, { 
       submissionId,
-      storeId: submission.storeId,
-      planogramId: submission.planogramId
+      storeId: submission.store_id,
+      planogramId: submission.planogram_id
     });
 
     // Update submission with new upload ID
@@ -225,19 +226,24 @@ export class SubmissionsService {
   ): Promise<UploadData> {
     // Upload file to storage
     const uploadedFile = await this.storageService.uploadFile(file, 'submissions');
-    console.log('uploadedFile', uploadedFile);
     
     // If submissionId is provided, get the submission to populate store and planogram IDs
-    let storeId = data.storeId;
-    let planogramId = data.planogramId;
+    let storeId: string | undefined = data.storeId;
+    let planogramId: string | undefined = data.planogramId;
     
-    if (data.submissionId && !storeId && !planogramId) {
-      const submission = await Submission.findById(data.submissionId) as SubmissionData;
+    if (data.submissionId && (!storeId || !planogramId)) {
+      const submission:any = await Submission.findById(data.submissionId) as SubmissionData;
       if (submission) {
-        storeId = submission.storeId || '';
-        planogramId = submission.planogramId || ''  ;
+        storeId = submission.store_id;
+        planogramId = submission.planogram_id;
       }
     }
+    // Guard against inserting empty strings into NOT NULL FKs
+    if (!storeId || !planogramId) {
+      throw new Error('Store ID and Planogram ID are required (provide both or a valid submissionId).');
+    }
+    const ensuredStoreId: string = storeId;
+    const ensuredPlanogramId: string = planogramId;
     
     const uploadData: UploadData = {
       id: uuidv4(),
@@ -246,12 +252,13 @@ export class SubmissionsService {
       fileType: file.mimetype,
       uploadedAt: new Date(),
       uploadedById,
-      storeId: storeId || '',
-      planogramId: planogramId || '',
-      submissionId: data.submissionId,
+      storeId: ensuredStoreId,
+      planogramId: ensuredPlanogramId,
+      submissionId: data.submissionId || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
+    console.log('uploadData', uploadData);
 
     return Upload.create(uploadData) as Promise<UploadData>;
   }
@@ -265,3 +272,4 @@ export class SubmissionsService {
     return Submission.delete(id) as unknown as Promise<void>;
   }
 }
+
