@@ -4,6 +4,7 @@
     "/auth/register": {
       "post": {
         "operationId": "AuthController_register",
+        "summary": "Register a new user",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -23,7 +24,6 @@
             "description": "Bad request"
           }
         },
-        "summary": "Register a new user",
         "tags": [
           "auth"
         ]
@@ -32,6 +32,7 @@
     "/auth/login": {
       "post": {
         "operationId": "AuthController_login",
+        "summary": "Log in a user",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -51,7 +52,6 @@
             "description": "Unauthorized"
           }
         },
-        "summary": "Log in a user",
         "tags": [
           "auth"
         ]
@@ -60,13 +60,13 @@
     "/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
+        "summary": "Log out a user",
         "parameters": [],
         "responses": {
           "200": {
             "description": "User successfully logged out"
           }
         },
-        "summary": "Log out a user",
         "tags": [
           "auth"
         ]
@@ -75,13 +75,13 @@
     "/auth/google": {
       "get": {
         "operationId": "AuthController_googleAuth",
+        "summary": "Initiate Google authentication",
         "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         },
-        "summary": "Initiate Google authentication",
         "tags": [
           "auth"
         ]
@@ -90,13 +90,13 @@
     "/auth/google/callback": {
       "get": {
         "operationId": "AuthController_googleAuthCallback",
+        "summary": "Google authentication callback",
         "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         },
-        "summary": "Google authentication callback",
         "tags": [
           "auth"
         ]
@@ -105,6 +105,7 @@
     "/auth/change-password": {
       "post": {
         "operationId": "AuthController_changePassword",
+        "summary": "Change user password",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -124,7 +125,6 @@
             "description": "Unauthorized"
           }
         },
-        "summary": "Change user password",
         "tags": [
           "auth"
         ]
@@ -133,6 +133,7 @@
     "/auth/forgot-password": {
       "post": {
         "operationId": "AuthController_forgotPassword",
+        "summary": "Request password reset email",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -152,7 +153,6 @@
             "description": "User not found"
           }
         },
-        "summary": "Request password reset email",
         "tags": [
           "auth"
         ]
@@ -161,6 +161,7 @@
     "/auth/reset-password": {
       "post": {
         "operationId": "AuthController_resetPassword",
+        "summary": "Reset password using token",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -180,7 +181,6 @@
             "description": "Invalid or expired token"
           }
         },
-        "summary": "Reset password using token",
         "tags": [
           "auth"
         ]
@@ -189,6 +189,7 @@
     "/users/profile": {
       "get": {
         "operationId": "UsersController_getProfile",
+        "summary": "Get current user profile",
         "parameters": [],
         "responses": {
           "200": {
@@ -198,18 +199,18 @@
             "description": "Unauthorized"
           }
         },
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "bearer": []
           }
-        ],
-        "summary": "Get current user profile",
-        "tags": [
-          "users"
         ]
       },
       "put": {
         "operationId": "UsersController_updateProfile",
+        "summary": "Update user profile",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -229,12 +230,103 @@
             "description": "Unauthorized"
           }
         },
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "bearer": []
           }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_listUsers",
+        "summary": "List users with search and sort options",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field (firstName, lastName, email, createdAt, updatedAt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search in firstName, lastName, and email fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by role",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isConfirmed",
+            "required": false,
+            "in": "query",
+            "description": "Filter by confirmation status",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "lastName",
+            "required": false,
+            "in": "query",
+            "description": "Filter by last name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstName",
+            "required": false,
+            "in": "query",
+            "description": "Filter by first name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "required": false,
+            "in": "query",
+            "description": "Filter by email",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
-        "summary": "Update user profile",
+        "responses": {
+          "200": {
+            "description": "Returns users list"
+          }
+        },
         "tags": [
           "users"
         ]
@@ -243,6 +335,7 @@
     "/users/send-confirmation-email": {
       "post": {
         "operationId": "UsersController_sendConfirmationEmail",
+        "summary": "Send email confirmation link",
         "parameters": [],
         "responses": {
           "200": {
@@ -255,20 +348,20 @@
             "description": "Internal server error"
           }
         },
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "bearer": []
           }
-        ],
-        "summary": "Send email confirmation link",
-        "tags": [
-          "users"
         ]
       }
     },
     "/users/confirm-email": {
       "post": {
         "operationId": "UsersController_confirmEmail",
+        "summary": "Confirm user email address",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -288,7 +381,6 @@
             "description": "Invalid or expired confirmation token"
           }
         },
-        "summary": "Confirm user email address",
         "tags": [
           "users"
         ]
@@ -297,6 +389,7 @@
     "/users/profile-picture": {
       "post": {
         "operationId": "UsersController_updateProfilePicture",
+        "summary": "Update user profile picture",
         "parameters": [],
         "responses": {
           "200": {
@@ -306,18 +399,18 @@
             "description": "Unauthorized"
           }
         },
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "bearer": []
           }
-        ],
-        "summary": "Update user profile picture",
-        "tags": [
-          "users"
         ]
       },
       "delete": {
         "operationId": "UsersController_deleteProfilePicture",
+        "summary": "Delete user profile picture",
         "parameters": [],
         "responses": {
           "200": {
@@ -327,14 +420,644 @@
             "description": "Unauthorized"
           }
         },
+        "tags": [
+          "users"
+        ],
         "security": [
           {
             "bearer": []
           }
+        ]
+      }
+    },
+    "/stores": {
+      "get": {
+        "operationId": "StoreController_findAll",
+        "summary": "List stores with search and sort options",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field (name, address, createdAt, updatedAt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search in name and address fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "required": false,
+            "in": "query",
+            "description": "Filter by store address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filter by store name",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
-        "summary": "Delete user profile picture",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
         "tags": [
-          "users"
+          "stores"
+        ]
+      },
+      "post": {
+        "operationId": "StoreController_create",
+        "summary": "Create store (admin)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "stores"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/stores/{id}": {
+      "get": {
+        "operationId": "StoreController_findOne",
+        "summary": "Get store by id",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "stores"
+        ]
+      },
+      "put": {
+        "operationId": "StoreController_update",
+        "summary": "Update store (admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "stores"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "StoreController_remove",
+        "summary": "Delete store (admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "stores"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/planograms": {
+      "get": {
+        "operationId": "PlanogramController_findAll",
+        "summary": "List planograms with search and sort options",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field (name, description, createdAt, updatedAt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search in name and description fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storeId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by store ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filter by planogram name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "planograms"
+        ]
+      },
+      "post": {
+        "operationId": "PlanogramController_create",
+        "summary": "Create planogram (admin)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanogramDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "planograms"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/planograms/{id}": {
+      "get": {
+        "operationId": "PlanogramController_findOne",
+        "summary": "Get planogram by id",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "planograms"
+        ]
+      },
+      "put": {
+        "operationId": "PlanogramController_update",
+        "summary": "Update planogram (admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanogramDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "planograms"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "PlanogramController_remove",
+        "summary": "Delete planogram (admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "planograms"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/submissions": {
+      "get": {
+        "operationId": "SubmissionsController_findAll",
+        "summary": "List submissions with search and sort options (admin only)",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field (uploadedAt, createdAt, updatedAt)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search in submission fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploadedById",
+            "required": false,
+            "in": "query",
+            "description": "Filter by uploaded by user ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planogramId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by planogram ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storeId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by store ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "SubmissionsController_createWithFileUpload",
+        "summary": "Create submission with file upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Create submission with file upload",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "planogramId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "storeId",
+                  "planogramId",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/submissions/{id}": {
+      "get": {
+        "operationId": "SubmissionsController_findOne",
+        "summary": "Get submission by id (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "SubmissionsController_update",
+        "summary": "Update submission (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubmissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "SubmissionsController_remove",
+        "summary": "Delete submission (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/submissions/{id}/uploads": {
+      "post": {
+        "operationId": "SubmissionsController_addUploadToSubmission",
+        "summary": "Add upload to existing submission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Add file upload to submission",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "submissions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
         ]
       }
     }
@@ -467,13 +1190,13 @@
           "email": {
             "type": "string"
           },
+          "profilePicture": {
+            "type": "string"
+          },
           "lang": {
             "type": "string"
           },
           "theme": {
-            "type": "string"
-          },
-          "profilePicture": {
             "type": "string"
           }
         }
@@ -481,6 +1204,142 @@
       "ConfirmEmailDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateStoreDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Store name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "imageSrc": {
+            "type": "string",
+            "description": "Image URL (S3 or public URL)"
+          },
+          "createdById": {
+            "type": "string",
+            "description": "Creator user id (UUID)"
+          },
+          "updatedById": {
+            "type": "string",
+            "description": "Updater user id (UUID)"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateStoreDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Store name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "imageSrc": {
+            "type": "string",
+            "description": "Image URL (S3 or public URL)"
+          },
+          "createdById": {
+            "type": "string",
+            "description": "Creator user id (UUID)"
+          },
+          "updatedById": {
+            "type": "string",
+            "description": "Updater user id (UUID)"
+          }
+        }
+      },
+      "CreatePlanogramDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Planogram name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "imageSrc": {
+            "type": "string",
+            "description": "Image URL (S3 or public URL)"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store id (UUID)"
+          },
+          "createdById": {
+            "type": "string",
+            "description": "Creator user id (UUID)"
+          },
+          "updatedById": {
+            "type": "string",
+            "description": "Updater user id (UUID)"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "storeId"
+        ]
+      },
+      "UpdatePlanogramDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Planogram name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "imageSrc": {
+            "type": "string",
+            "description": "Image URL (S3 or public URL)"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store id (UUID)"
+          },
+          "createdById": {
+            "type": "string",
+            "description": "Creator user id (UUID)"
+          },
+          "updatedById": {
+            "type": "string",
+            "description": "Updater user id (UUID)"
+          }
+        }
+      },
+      "UpdateSubmissionDto": {
+        "type": "object",
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "description": "Store ID (UUID)"
+          },
+          "planogramId": {
+            "type": "string",
+            "description": "Planogram ID (UUID)"
+          },
+          "uploadIds": {
+            "description": "Array of upload IDs to associate with submission",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     }
   }

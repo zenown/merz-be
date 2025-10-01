@@ -7,6 +7,7 @@ import {
   Res,
   Get,
   HttpCode,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -31,6 +32,29 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
+  @Post('admin/login')
+  @HttpCode(200)
+  @UseGuards(AuthGuard('local'))
+  @ApiOperation({ summary: 'Log in a user' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'User successfully logged in' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async adminLogin(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const { accessToken, user } = await this.authService.login(req.user);
+    if(user.role !== 'ADMIN') {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    // Set JWT as HTTP-only cookie
+    res.cookie('jwt', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: parseInt(process.env.JWT_EXPIRATION || '3600') * 1000,
+    });
+
+    return { user , accessToken};
+  }
+
 
   @Post('login')
   @HttpCode(200)
