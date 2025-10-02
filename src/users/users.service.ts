@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
 import { StorageService } from '../storage/storage.service';
+import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -206,5 +208,74 @@ export class UsersService {
     return this.update(userId, {
       profilePicture: '',
     }) as Promise<UserData>;
+  }
+
+  private generatePassword(): string {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    
+    // Ensure at least one character from each category
+    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // lowercase
+    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // uppercase
+    password += '0123456789'[Math.floor(Math.random() * 10)]; // number
+    password += '!@#$%^&*'[Math.floor(Math.random() * 8)]; // special char
+    
+    // Fill the rest randomly
+    for (let i = 4; i < length; i++) {
+      password += charset[Math.floor(Math.random() * charset.length)];
+    }
+    
+    // Shuffle the password
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+  }
+
+  async createAdminUser(userData: {
+    role: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<{ user: UserData; password: string }> {
+    // Check if user already exists
+    const existingUser = await User.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error('User with this email already exists');
+    }
+
+    // Generate password
+    const generatedPassword = this.generatePassword();
+    
+    // Hash the password using bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(generatedPassword, saltRounds);
+
+    // Create user data
+    const newUserData: UserData = {
+      id: uuidv4(),
+      email: userData.email,
+      password: hashedPassword,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      role: userData.role as any,
+
+      isConfirmed: true, // Admin created users are auto-confirmed
+    };
+
+    // Try to send email first
+    const emailSent = await this.emailService.sendPasswordEmail(
+      userData.email,
+      generatedPassword,
+      userData.firstName,
+      userData.lastName
+    );
+
+    if (!emailSent) {
+      throw new Error('Failed to send password email. User not created.');
+    }
+
+    // Create user only if email was sent successfully
+    const user = await this.create(newUserData);
+    
+    return { user, password: generatedPassword };
   }
 }

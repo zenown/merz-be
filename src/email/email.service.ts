@@ -17,14 +17,14 @@ export class EmailService {
       secure: false, // true for 465, false for other ports
       auth: {
         user: this.configService.get('SMTP_USER'),
-        pass: this.configService.get('SMTP_PASSWORD'),
+        pass: this.configService.get('SMTP_PASS'),
       },
       tls: {
         rejectUnauthorized: false, // Accept self-signed certificates
       },
     });
 
-    this.templatesDir = this.configService.get('EMAIL_TEMPLATES_DIR') + '';
+    this.templatesDir = this.configService.get('EMAIL_TEMPLATES_DIR') || 'src/email/templates';
   }
 
   private async compileTemplate(
@@ -120,6 +120,36 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Error sending password reset email:', error);
+      return false;
+    }
+  }
+
+  async sendPasswordEmail(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    lang: string = 'en',
+  ): Promise<boolean> {
+    try {
+      const html = await this.compileTemplate('password_email_' + lang, {
+        appName: this.configService.get('APP_NAME'),
+        password,
+        firstName,
+        lastName,
+        currentYear: new Date().getFullYear(),
+      });
+
+      await this.transporter.sendMail({
+        from: this.configService.get('SMTP_USER'),
+        to: email,
+        subject:
+          this.configService.get('APP_NAME') + ' - ' + 'Your Account Credentials',
+        html,
+      });
+      return true;
+    } catch (error) {
+      console.error('Error sending password email:', error);
       return false;
     }
   }

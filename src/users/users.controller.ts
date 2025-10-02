@@ -26,6 +26,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Query } from '@nestjs/common';
 import { ConfirmEmailDto } from './dto/confirm-email.dto';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -63,6 +64,27 @@ export class UsersController {
       sortBy,
       sortOrder
     });
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new user with generated password' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - email already exists or email sending failed' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async createUser(@Body() createAdminUserDto: CreateAdminUserDto) {
+    try {
+      const result = await this.usersService.createAdminUser(createAdminUserDto);
+      const { password, ...user } = result;
+      return {
+        message: 'User created successfully and password sent via email',
+        user: user.user
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to create user',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Put('profile')

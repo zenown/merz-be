@@ -43,46 +43,46 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   password: string;
 
-  @Column({ name: 'first_name', nullable: true })
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column({ name: 'last_name', nullable: true })
+  @Column({ nullable: true })
   lastName: string;
 
-  @Column({ name: 'google_id', nullable: true })
+  @Column({ nullable: true })
   googleId: string;
 
-  @Column({ name: 'profile_picture', nullable: true })
+  @Column({ nullable: true })
   profilePicture: string;
 
-  @Column({ name: 'is_confirmed', default: false })
+  @Column({ default: false })
   isConfirmed: boolean;
 
-  @Column({ name: 'lang', default: 'en', nullable: true })
+  @Column({ default: 'en', nullable: true })
   lang: string;
 
-  @Column({ name: 'theme', default: 'light', nullable: true })
+  @Column({ default: 'light', nullable: true })
   theme: string;
 
-  @Column({ name: 'last_password_reset_at', nullable: true })
+  @Column({ nullable: true })
   lastPasswordResetAt: Date;
 
-  @Column({ name: 'last_email_confirmation_at', nullable: true })
+  @Column({ nullable: true })
   lastEmailConfirmationAt: Date;
 
-  @Column({ name: 'created_by_id', nullable: true })
+  @Column({ nullable: true })
   createdById: string;
 
-  @Column({ name: 'updated_by_id', nullable: true })
+  @Column({ nullable: true })
   updatedById: string;
 
-  @Column({ name: 'role', type: 'enum', enum: UserRole, default: UserRole.USER })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   static async findByEmail(email: string) {
