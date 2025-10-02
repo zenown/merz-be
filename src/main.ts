@@ -49,7 +49,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.use(bodyParser.json());
 
-  await app.listen(3002);
+  await app.listen(process.env.PORT || 3002);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
