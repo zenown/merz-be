@@ -167,7 +167,6 @@ export class SubmissionsService {
       storeId: data.storeId,
       planogramId: data.planogramId,
       submissionId: '', // Will be updated after submission is created
-      imageSrc: uploadedFile.url,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -264,7 +263,6 @@ export class SubmissionsService {
       storeId: ensuredStoreId,
       planogramId: ensuredPlanogramId,
       submissionId: data.submissionId || null,
-      imageSrc: uploadedFile.url,
       createdAt: new Date(),
       updatedAt: new Date()
     };

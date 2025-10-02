@@ -17,7 +17,6 @@ export interface UploadData {
   storeId?: string;
   planogramId?: string;
   submissionId?: string | null;
-  imageSrc?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
