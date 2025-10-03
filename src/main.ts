@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { DatabaseService } from './database/database.service';
 import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -49,8 +50,22 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.use(bodyParser.json());
 
+  // Enable proper shutdown hooks to close DB pool
+  app.enableShutdownHooks();
+
   await app.listen(process.env.PORT || 3002);
   console.log(`Application is running on: ${await app.getUrl()}`);
+
+  // Ensure pool closes on process signals in environments that don't call onModuleDestroy
+  const db = app.get(DatabaseService);
+  const close = async () => {
+    try {
+      await db.onModuleDestroy();
+    } catch (e) {}
+    process.exit(0);
+  };
+  process.on('SIGTERM', close);
+  process.on('SIGINT', close);
 }
 bootstrap();
 
