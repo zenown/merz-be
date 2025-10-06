@@ -33,7 +33,14 @@ export class SubmissionsService {
     sortBy?: string;
     sortOrder?: 'ASC' | 'DESC';
   } = {}): Promise<any[]> {
+    if(!options.sortBy ) {
+      options.sortBy = 'uploaded_at';
+    }
+    if(!options.sortOrder) {
+      options.sortOrder = 'DESC';
+    }
     const { filter = {}, search, sortBy, sortOrder } = options;
+    
     
     const searchColumns = ['id'];
     const submissions = await Submission.findAllWithSearchAndSort({
