@@ -8,6 +8,8 @@ import { StoreModule } from './store/store.module';
 import { PlanogramModule } from './planogram/planogram.module';
 import { StorageModule } from './storage/storage.module';
 import { SubmissionsModule } from './submissions/submissions.module';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { SubmissionsModule } from './submissions/submissions.module';
     PlanogramModule,
     SubmissionsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
 
