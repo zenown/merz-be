@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { UserData } from '../users/entities/user.entity';
+import { UserData, UserRole } from '../users/entities/user.entity';
 import { EmailService } from 'src/email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,6 +56,7 @@ export class AuthService {
       id: uuidv4(),
       ...userData,
       password: hashedPassword,
+      role: UserRole.ADMIN,
     });
 
     // Remove password from response
