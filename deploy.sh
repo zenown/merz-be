@@ -20,7 +20,7 @@ if [ "$deployTo" == "production" ]; then
     ENDPOINT="ch.prod.ssh.merz.zenown.com"
     COMMANDTORUN+="cd /home/ec2-user/merz-be; "
     COMMANDTORUN+="git stash push -u -m 'auto-deploy $(date +'%F %T')'; "
-    COMMANDTORUN+="git pull --rebase origin master; "
+    COMMANDTORUN+="git pull --rebase origin main; "
     COMMANDTORUN+="npm ci; "
     COMMANDTORUN+="npm run build; "
     COMMANDTORUN+="pm2 stop MerzStageAPI || true; "
@@ -31,13 +31,13 @@ if [ "$deployTo" == "production" ]; then
 
 elif [ "$deployTo" == "1" ]; then
     echo "---------------------------------------------"
-    echo "🚀 DEPLOYING TO STAGE"
+    echo "-----------🚀 DEPLOYING TO STAGE-------------"
     echo "---------------------------------------------"
 
     ENDPOINT="ch.dev.ssh.merz.zenown.com"
     COMMANDTORUN+="cd /home/ec2-user/merz-be; "
     COMMANDTORUN+="git stash push -u -m 'auto-deploy $(date +'%F %T')'; "
-    COMMANDTORUN+="git pull --rebase origin develop; "
+    COMMANDTORUN+="git pull --rebase origin main; "
     COMMANDTORUN+="npm ci; "
     COMMANDTORUN+="npm run build; "
     COMMANDTORUN+="pm2 stop MerzStageAPI || true; "
