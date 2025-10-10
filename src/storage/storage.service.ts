@@ -24,6 +24,11 @@ export class StorageService {
       !config.s3?.accessKeyId || 
       !config.s3?.secretAccessKey ||
       config.storageType === undefined; // Default to local if storageType is undefined
+
+    // Configure AWS SDK to use signature version 4
+    AWS.config.update({
+      signatureVersion: 'v4',
+    });
     
     console.log('Storage config:', {
       storageType: config.storageType,
@@ -40,6 +45,8 @@ export class StorageService {
         accessKeyId: config.s3.accessKeyId,
         secretAccessKey: config.s3.secretAccessKey,
         endpoint: config.s3.endpoint,
+        signatureVersion: 'v4',
+        s3ForcePathStyle: false,
       });
     } else if (config.local) {
       // Ensure upload directory exists
@@ -113,12 +120,15 @@ export class StorageService {
 
     const result = await this.s3.upload(params as any).promise();
 
+    // Generate signed URL for the uploaded file
+    const signedUrl = this.generateSignedUrl(key);
+
     return {
       path: key,
       filename,
       mimetype: file.mimetype,
       size: file.size,
-      url: result.Location,
+      url: signedUrl,
     };
   }
 
@@ -151,16 +161,40 @@ export class StorageService {
     }
   }
 
+  generateSignedUrl(filepath: string, expiresIn: number = 3600): string {
+    if (!filepath) return '';
+
+    if (this.isLocalStorage) {
+      return `/public/${filepath.replace(/\\/g, '/')}`;
+    } else {
+      if (!this.config?.s3?.bucketName) {
+        throw new Error('S3 bucket name is not configured');
+      }
+      
+      try {
+        const params = {
+          Bucket: this.config.s3.bucketName,
+          Key: filepath,
+          Expires: expiresIn, // URL expires in specified seconds (default 1 hour)
+        };
+        
+        // Ensure we're using AWS4 signature version
+        return this.s3.getSignedUrl('getObject', params);
+      } catch (error) {
+        console.error('Error generating signed URL:', error);
+        throw new Error('Failed to generate signed URL');
+      }
+    }
+  }
+
   getPublicUrl(filepath: string): string {
     if (!filepath) return '';
 
     if (this.isLocalStorage) {
       return `/public/${filepath.replace(/\\/g, '/')}`;
     } else {
-      if (!this.config?.s3?.bucketName || !this.config?.s3?.region) {
-        throw new Error('S3 bucket name or region is not configured');
-      }
-      return `https://${this.config.s3.bucketName}.s3.${this.config.s3.region}.amazonaws.com/${filepath}`;
+      // For S3, return a signed URL instead of direct URL
+      return this.generateSignedUrl(filepath);
     }
   }
 }

@@ -1,11 +1,13 @@
 import {
   Controller,
   Post,
+  Get,
   UseInterceptors,
   UploadedFile,
   Body,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
@@ -106,6 +108,62 @@ export class StorageController {
       };
     } catch (error) {
       throw new Error(`Failed to upload image: ${error.message}`);
+    }
+  }
+
+  @Get('signed-url')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Generate a signed URL for an existing file' })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed URL generated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: {
+          type: 'object',
+          properties: {
+            signedUrl: { type: 'string' },
+            expiresIn: { type: 'number' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Missing filepath parameter',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  async generateSignedUrl(
+    @Query('filepath') filepath: string,
+    @Query('expiresIn') expiresIn: string = '3600',
+  ) {
+    if (!filepath) {
+      throw new Error('Filepath parameter is required');
+    }
+
+    try {
+      const expiresInSeconds = parseInt(expiresIn, 10) || 3600;
+      const signedUrl = this.storageService.generateSignedUrl(filepath, expiresInSeconds);
+      
+      return {
+        success: true,
+        data: {
+          signedUrl,
+          expiresIn: expiresInSeconds,
+        },
+      };
+    } catch (error) {
+      throw new Error(`Failed to generate signed URL: ${error.message}`);
     }
   }
 }

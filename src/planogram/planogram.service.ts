@@ -4,10 +4,14 @@ import { Planogram, PlanogramData } from './planogram.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../users/entities/user.entity';
 import { Store } from '../store/store.entity';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class PlanogramService {
-  constructor(private readonly databaseService: DatabaseService) {
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly storageService: StorageService
+  ) {
     Planogram.setDatabaseService(this.databaseService);
     Planogram.setTableName('planograms');
     User.setDatabaseService(this.databaseService);
@@ -49,6 +53,11 @@ export class PlanogramService {
     for (const planogram of planograms) {
       const populatedPlanogram: any = { ...planogram };
       
+      // Add imageUrl field
+      if (planogram.imageSrc) {
+        populatedPlanogram.imageUrl = this.storageService.generateSignedUrl(planogram.imageSrc);
+      }
+      
       // Populate store relation
       if (planogram.storeId) {
         try {
@@ -57,7 +66,8 @@ export class PlanogramService {
             id: store.id,
             name: store.name,
             address: store.address,
-            imageSrc: store.imageSrc
+            imageSrc: store.imageSrc,
+            imageUrl: store.imageSrc ? this.storageService.generateSignedUrl(store.imageSrc) : null
           } : null;
         } catch (error) {
           populatedPlanogram.store = null;

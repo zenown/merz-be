@@ -3,10 +3,14 @@ import { DatabaseService } from '../database/database.service';
 import { Store, StoreData } from './store.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../users/entities/user.entity';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class StoreService {
-  constructor(private readonly databaseService: DatabaseService) {
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly storageService: StorageService
+  ) {
     Store.setDatabaseService(this.databaseService);
     Store.setTableName('stores');
     User.setDatabaseService(this.databaseService);
@@ -45,6 +49,11 @@ export class StoreService {
     
     for (const store of stores) {
       const populatedStore: any = { ...store };
+      
+      // Add imageUrl field
+      if (store.imageSrc) {
+        populatedStore.imageUrl = this.storageService.generateSignedUrl(store.imageSrc);
+      }
       
       // Populate createdBy relation
       if (store.createdById) {
