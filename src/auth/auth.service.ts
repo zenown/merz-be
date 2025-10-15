@@ -56,7 +56,7 @@ export class AuthService {
       id: uuidv4(),
       ...userData,
       password: hashedPassword,
-      role: UserRole.ADMIN,
+     // role: UserRole.ADMIN,
     });
 
     // Remove password from response
