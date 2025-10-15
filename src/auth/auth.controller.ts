@@ -24,14 +24,14 @@ import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('register')
+ /* @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
-  }
+  }*/
   @Post('admin/login')
   @HttpCode(200)
   @UseGuards(AuthGuard('local'))
@@ -87,7 +87,7 @@ export class AuthController {
 
     return { message: 'Logout successful' };
   }
-
+/*
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google authentication' })
@@ -113,7 +113,7 @@ export class AuthController {
 
     // Redirect to frontend or return user data
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3001'}/`);
-  }
+  }*/
 
   @Post('change-password')
   @UseGuards(JwtAuthGuard)
