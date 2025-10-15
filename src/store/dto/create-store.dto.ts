@@ -10,7 +10,6 @@ export class CreateStoreDto {
   @ApiPropertyOptional({ description: 'Address' })
   @IsOptional()
   @IsString()
-  @Length(1, 512)
   address?: string;
 
   @ApiPropertyOptional({ description: 'Image URL (S3 or public URL)' })
