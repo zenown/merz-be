@@ -126,7 +126,8 @@ export class SubmissionsService {
           // Add imageSrc to each upload
           const uploadsWithImageSrc = uploads.map((upload: any) => ({
             ...upload,
-            imageSrc: this.storageService.getPublicUrl('submissions/' + upload.filename)
+            imageSrc: this.storageService.getPublicUrl('submissions/' + upload.filename),
+            imageDownloadUrl: this.storageService.getPublicUrl('submissions/' + upload.filename, true)
           }));
           
           populatedSubmission.uploads = uploadsWithImageSrc

@@ -161,7 +161,7 @@ export class StorageService {
     }
   }
 
-  generateSignedUrl(filepath: string, expiresIn: number = 3600): string {
+  generateSignedUrl(filepath: string, expiresIn: number = 3600, download: boolean = false): string {
     if (!filepath) return '';
 
     if (this.isLocalStorage) {
@@ -176,7 +176,10 @@ export class StorageService {
           Bucket: this.config.s3.bucketName,
           Key: filepath,
           Expires: expiresIn, // URL expires in specified seconds (default 1 hour)
-        };
+        } as any;
+        if (download) {
+          params.ResponseContentDisposition = `attachment; filename="${filepath.split('/').pop()}"`;
+        }
         
         // Ensure we're using AWS4 signature version
         return this.s3.getSignedUrl('getObject', params);
@@ -187,14 +190,14 @@ export class StorageService {
     }
   }
 
-  getPublicUrl(filepath: string): string {
+  getPublicUrl(filepath: string, download: boolean = false): string {
     if (!filepath) return '';
 
     if (this.isLocalStorage) {
       return `/public/${filepath.replace(/\\/g, '/')}`;
     } else {
       // For S3, return a signed URL instead of direct URL
-      return this.generateSignedUrl(filepath);
+      return this.generateSignedUrl(filepath, 3600, download);
     }
   }
 }
